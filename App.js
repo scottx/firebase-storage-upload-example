@@ -11,37 +11,45 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Constants, ImagePicker } from 'expo';
+// import { Constants, ImagePicker } from 'expo';
+import { Constants, DocumentPicker } from 'expo';
 import uuid from 'uuid';
 import * as firebase from 'firebase';
 
 console.disableYellowBox = true;
 
-const url =
-  'https://firebasestorage.googleapis.com/v0/b/blobtest-36ff6.appspot.com/o/Obsidian.jar?alt=media&token=93154b97-8bd9-46e3-a51f-67be47a4628a';
+// const url = 'https://firebasestorage.googleapis.com/v0/b/blobtest-36ff6.appspot.com/o/Obsidian.jar?alt=media&token=93154b97-8bd9-46e3-a51f-67be47a4628a';
 
-const firebaseConfig = {
+/* const firebaseConfig = {
   apiKey: 'AIzaSyAlZruO2T_JNOWn4ysfX6AryR6Dzm_VVaA',
   authDomain: 'blobtest-36ff6.firebaseapp.com',
   databaseURL: 'https://blobtest-36ff6.firebaseio.com',
   storageBucket: 'blobtest-36ff6.appspot.com',
   messagingSenderId: '506017999540',
+}; */
+
+const firebaseConfig = {
+  // messagingSenderId: '506017999540',
+  apiKey: "AIzaSyA_A3i0evsHTlXeXzX3XNAbvprh-w4VOMM",
+  authDomain: "spotify2-c40cc.firebaseapp.com",
+  databaseURL: "https://spotify2-c40cc.firebaseio.com/",
+  storageBucket: "spotify2-c40cc.appspot.com"
 };
 
 firebase.initializeApp(firebaseConfig);
 
 export default class App extends React.Component {
   state = {
-    image: null,
+    music: null,
     uploading: false,
   };
 
   render() {
-    let { image } = this.state;
+    let { music } = this.state;
 
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        {image ? null : (
+        {music ? null : (
           <Text
             style={{
               fontSize: 20,
@@ -54,11 +62,11 @@ export default class App extends React.Component {
         )}
 
         <Button
-          onPress={this._pickImage}
+          onPress={this._pickMusic}
           title="Pick an image from camera roll"
         />
 
-        <Button onPress={this._takePhoto} title="Take a photo" />
+        {/* <Button onPress={this._takePhoto} title="Take a photo" /> */}
 
         {this._maybeRenderImage()}
         {this._maybeRenderUploadingOverlay()}
@@ -87,8 +95,8 @@ export default class App extends React.Component {
   };
 
   _maybeRenderImage = () => {
-    let { image } = this.state;
-    if (!image) {
+    let { music } = this.state;
+    if (!music) {
       return;
     }
 
@@ -100,24 +108,11 @@ export default class App extends React.Component {
           borderRadius: 3,
           elevation: 2,
         }}>
-        <View
-          style={{
-            borderTopRightRadius: 3,
-            borderTopLeftRadius: 3,
-            shadowColor: 'rgba(0,0,0,1)',
-            shadowOpacity: 0.2,
-            shadowOffset: { width: 4, height: 4 },
-            shadowRadius: 5,
-            overflow: 'hidden',
-          }}>
-          <Image source={{ uri: image }} style={{ width: 250, height: 250 }} />
-        </View>
 
         <Text
           onPress={this._copyToClipboard}
-          onLongPress={this._share}
           style={{ paddingVertical: 10, paddingHorizontal: 10 }}>
-          {image}
+          {music}
         </Text>
       </View>
     );
@@ -125,17 +120,17 @@ export default class App extends React.Component {
 
   _share = () => {
     Share.share({
-      message: this.state.image,
+      message: this.state.music,
       title: 'Check out this photo',
-      url: this.state.image,
+      url: this.state.music,
     });
   };
 
   _copyToClipboard = () => {
-    Clipboard.setString(this.state.image);
-    alert('Copied image URL to clipboard');
+    Clipboard.setString(this.state.music);
+    alert('Copied music URL to clipboard');
   };
-
+/* 
   _takePhoto = async () => {
     let pickerResult = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
@@ -144,23 +139,23 @@ export default class App extends React.Component {
 
     this._handleImagePicked(pickerResult);
   };
-
-  _pickImage = async () => {
-    let pickerResult = await ImagePicker.launchImageLibraryAsync({
-      allowsEditing: true,
-      aspect: [4, 3],
+ */
+  _pickMusic = async () => {
+    let pickerResult = await DocumentPicker.getDocumentAsync({
+      type: 'audio/*'
     });
 
-    this._handleImagePicked(pickerResult);
+    this._handleMusicUploaded(pickerResult);
   };
 
-  _handleImagePicked = async pickerResult => {
+  _handleMusicUploaded = async pickerResult => {
     try {
       this.setState({ uploading: true });
 
       if (!pickerResult.cancelled) {
         uploadUrl = await uploadImageAsync(pickerResult.uri);
-        this.setState({ image: uploadUrl });
+        console.log(pickerResult.uri);
+        this.setState({ music: uploadUrl });
       }
     } catch (e) {
       console.log(e);
